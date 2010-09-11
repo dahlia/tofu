@@ -105,14 +105,14 @@ Functions keep their own context environment.  Read a following example code:
 The last call returns ``6``. The form `(var) <- val` is similar to
 `(set! var val)` in Scheme.
 
-| Language    | Definition            | Assignment              |
-| ----------- | --------------------- | ----------------------- |
-| Tofu        | `name <- value`       | `(name) <- value`       |
-| Scheme      | `(define name value)` | `(set! name value)`     |
-| JavaScript  | `var name = value`    | `name = value`          |
-| Lua         | `local name = value`  | `name = value`          |
-| Python (>3) | `name = value`        | `nonlocal name = value` |
-| Perl        | `my $name = value`    | `$name = value`         |
+Language    | Definition            | Assignment             
+----------- | --------------------- | -----------------------
+Tofu        | `name <- value`       | `(name) <- value`      
+Scheme      | `(define name value)` | `(set! name value)`    
+JavaScript  | `var name = value`    | `name = value`         
+Lua         | `local name = value`  | `name = value`         
+Python (>3) | `name = value`        | `nonlocal name = value`
+Perl        | `my $name = value`    | `$name = value`        
 
 
 Omitting Parentheses In Function Call
