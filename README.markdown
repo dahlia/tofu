@@ -31,8 +31,8 @@ Following code defines some functions.
 
     max <- ([numbers]): {
       top <- numbers(0)
-      numbers.each (number): {
-        top <- (top > number)(top, number)
+      foreach numbers, (number): {
+        .top <- (top > number)(top, number)
       }
       top
     }
@@ -93,7 +93,7 @@ Functions keep their own context environment.  Read a following example code:
 
     accumulator <- (initval <- 0): {
       (num <- 0): {
-        (initval) <- initval + num
+        .initval <- initval + num
       }
     }
 
@@ -102,12 +102,12 @@ Functions keep their own context environment.  Read a following example code:
     acc(3)
     acc()
 
-The last call returns ``6``. The form `(var) <- val` is similar to
+The last call returns ``6``. The form `.var <- val` is similar to
 `(set! var val)` in Scheme.
 
 Language    | Definition            | Assignment             
 ----------- | --------------------- | -----------------------
-Tofu        | `name <- value`       | `(name) <- value`      
+Tofu        | `name <- value`       | `.name <- value`      
 Scheme      | `(define name value)` | `(set! name value)`    
 JavaScript  | `var name = value`    | `name = value`         
 Lua         | `local name = value`  | `name = value`         
@@ -236,18 +236,19 @@ the number of elements. It accepts any type.
 
     list <- ["a", "b", "c", [1, 2, 3]]
 
-You can count the number of elements in the list.  Use pseudo-attribute `size`.
+You can count the number of elements in the list.  Use `count` function.
 
-    list.size
+    count(list)  # 4
 
-To iterate the list, use psuedo-method `each`.  This method is higher-order
-function, and, function to pass to its parameters should accept one or two
-arguments: value and optional index number of element.
+To iterate the list, use `foreach` function.  This is a higher-order function
+which takes a function takes one or two arguments: value and optional index
+number of element.
 
-    list.each (value): stdout.write(value & "\n") # it prints elements of list
+    foreach list, (value): stdout.write(value ++ "\n"
+    # it prints elements of list
 
-    list.each (value, index): {            # it prints elements and its index
-      stdout.write(index & ". " & value)   # of list
+    foreach list, (value, index): {       # it prints elements and its index
+      stdout.write(index ++ ". " ++ value)  # of list
       stdout.write("\n")
     }
 
@@ -255,26 +256,54 @@ If you need `for`-like loop of C/C++, use function `range`.  It generates a
 list that contains sequential numbers.  It is equal to the function of the
 same name in Python.
 
-    range(5)        # [0, 1, 2, 3, 4]
-    range(3, 7)     # [3, 4, 5, 6]
-    range(2, 12, 3) # [2, 5, 8, 11]
+    range(5)         # [0, 1, 2, 3, 4]
+    range(3, 7)      # [3, 4, 5, 6]
+    range(2, 12, 3)  # [2, 5, 8, 11]
 
-    range(1, 10) each stdout.write # it prints: 123456789
+    foreach range(1, 10), stdout.write  # it prints: 123456789
 
 Maps have keys of string and its values.  The key and its value are called
 "pair", and you can translate pairs of the map to the two-dimensional list by
 function `pairs`.
 
     name <- { family <- "Hong"; given <- "Minhee" }
-    pairs(name) # [["family", "Hong"], ["given", "Minhee"]]
+    pairs(name)  # [["family", "Hong"], ["given", "Minhee"]]
 
 There are `keys` and `values` also.
 
-    keys(name)   # ["family", "given"]
-    values(name) # ["Hong", "Minhee"]
+    keys(name)    # ["family", "given"]
+    values(name)  # ["Hong", "Minhee"]
 
 There is no order in the map, so, order of the list which returned by `pairs`,
 `keys` and `values` depend on implementation.
+
+Functions `count` and `foreach` are generic: it works well for maps also.
+
+    count(name)  # 2
+
+    foreach name, (key): write(stdout, key ++ ": " ++ name(key) ++ "\n")
+    # above prints: (but order of lines are not deterministic.)
+    #   family: Hong
+    #   given: Minhee
+
+
+Immutable values
+----------------
+
+All types of values in Tofu are immutable.
+
+Lists and maps are also immutable.  So you cannot append a list or set a new
+key of a map.  Instead, they returns a new list or a new map.
+
+    lst <- [1, 2, 3]
+    newlst <- lst ++ [4, 5]     # [1, 2, 3, 4, 5]
+    newlst2 <- newlst << 6      # [1, 2, 3, 4, 5, 6]
+
+In the same manner, strings are immutable.
+
+    str <- "abcd"
+    newstr <- str ++ "ef"  # "abcdef"
+    replace(newstr, "ab", "AB")  # "ABcdef"
 
 
 BNF
@@ -284,10 +313,11 @@ BNF
     <termiate>     ::= ( ";" | <newline> ) [ <terminate> ]
     <expr>         ::= "(" <expr> ")"
                      | <literal>
-                     | <lvalue>
-                     | <func-call>
-                     | <op-call>
-                     | <assign>
+                     | <id>
+                     | <attr>
+                     | <apply>
+                     | <operator>
+                     | <define>
     <literal>      ::= <str-literal>
                      | <dict-literal>
                      | <func-def>
@@ -298,15 +328,15 @@ BNF
     <dict-literal> ::= "{" <program> "}"
     <func-def>     ::= "(" <params> ")" ":" <dict-literal>
     <list-literal> ::= "[" { <expr> "," } [ expr [ "," ] ] "]"
-    <lvalue>       ::= <id>
+    <lvalue>       ::= [ "." ] <id>
                      | <attr>
     <id>           ::= /[^[:digit:][:space:]][^[:space:]]*/ except "<-"
     <attr>         ::= <expr> "." ( <id> | <number> )
-    <func-call>    ::= <expr> "(" <args> ")"
+    <apply>        ::= <expr> "(" <args> ")"
                      | <expr> <args>
     <args>         ::= { <expr> "," } [ <expr> [ "," ] ]
-    <op-call>      ::= <expr> <id> <expr>
-    <assign>       ::= <lvalue> "<-" <expr>
+    <operator>     ::= <expr> <id> <expr>
+    <define>       ::= <lvalue> "<-" <expr>
 
 
 Author And License
