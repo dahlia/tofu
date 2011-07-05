@@ -40,8 +40,8 @@ You may be able to infer some interesting rules.
    to variable name, like JavaScript, Lua.  Tofu supports lambda functions with
    following syntax:
 
-       (arg1, arg2): form
-       (arg1, arg2): { form; form2 }
+        (arg1, arg2): form
+        (arg1, arg2): { form; form2 }
 
  - Two literal types.  General function literal (block), and string literal.
    There's no exact numeric type, but only a string type.
