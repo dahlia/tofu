@@ -1,13 +1,8 @@
 Tofu Programming Language
 =========================
 
-Tofu is a programming language to be embedded in C++ programs.  You can use it
-to embed while you are writing a big C++ program and it should have various
-small plug-in programs.  If you want a nicer embeddable programming language,
-there are [Lua][] and [Io][].
-
-  [lua]: http://www.lua.org/
-  [io]: http://iolanguage.com/
+Tofu is a small programming language made just for fun.  Don't try to find any
+practical value from the language.
 
 
 Functions
@@ -49,6 +44,7 @@ You may be able to infer some interesting rules.
        (arg1, arg2): { form; form2 }
 
  - Two literal types.  General function literal (block), and string literal.
+   There's no exact numeric type, but only a string type.
    For example, `123` same as `"123"`.
 
  - When boolean values are called, they behave like trinary operator in the
@@ -102,17 +98,17 @@ Functions keep their own context environment.  Read a following example code:
     acc(3)
     acc()
 
-The last call returns ``6``. The form `.var <- val` is similar to
+The last call returns `6`. The form `.var <- val` is similar to
 `(set! var val)` in Scheme.
 
-Language    | Definition            | Assignment             
------------ | --------------------- | -----------------------
-Tofu        | `name <- value`       | `.name <- value`      
-Scheme      | `(define name value)` | `(set! name value)`    
-JavaScript  | `var name = value`    | `name = value`         
-Lua         | `local name = value`  | `name = value`         
-Python (>3) | `name = value`        | `nonlocal name = value`
-Perl        | `my $name = value`    | `$name = value`        
+Language             | Definition            | Assignment             
+-------------------- | --------------------- | -----------------------
+Tofu                 | `name <- value`       | `.name <- value`      
+Scheme               | `(define name value)` | `(set! name value)`    
+JavaScript           | `var name = value`    | `name = value`         
+Lua                  | `local name = value`  | `name = value`         
+Python (3 or higher) | `name = value`        | `nonlocal name = value`
+Perl                 | `my $name = value`    | `$name = value`        
 
 
 Omitting Parentheses In Function Call
@@ -327,14 +323,15 @@ BNF
     <number>       ::= /\d+/
     <dict-literal> ::= "{" <program> "}"
     <func-def>     ::= "(" <params> ")" ":" <dict-literal>
-    <list-literal> ::= "[" { <expr> "," } [ expr [ "," ] ] "]"
+    <params>       ::= { <id> "," } [ <id> ]
+    <list-literal> ::= "[" { <expr> "," } [ <expr> ] "]"
     <lvalue>       ::= [ "." ] <id>
                      | <attr>
     <id>           ::= /[^[:digit:][:space:]][^[:space:]]*/ except "<-"
     <attr>         ::= <expr> "." ( <id> | <number> )
     <apply>        ::= <expr> "(" <args> ")"
                      | <expr> <args>
-    <args>         ::= { <expr> "," } [ <expr> [ "," ] ]
+    <args>         ::= { <expr> "," } [ <expr> ]
     <operator>     ::= <expr> <id> <expr>
     <define>       ::= <lvalue> "<-" <expr>
 
